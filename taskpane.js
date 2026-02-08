@@ -1,8 +1,24 @@
+/* global Office */
+
+Office.onReady((info) => {
+    if (info.host === Office.HostType.PowerPoint) {
+        document.getElementById("btnGenerateIcon").onclick = handleTextToIcon;
+        document.getElementById("btnInsert").onclick = insertToSlide;
+    }
+});
+
 async function handleTextToIcon() {
-    // ইনপুট ভ্যালু সংগ্রহ করা
-    const rawInput = document.getElementById("iconInput").value;
-    const apiType = document.getElementById("apiType").value;
-    const userApiKey = document.getElementById("userApiKey").value;
+    // এলিমেন্টগুলো সংগ্রহ করা
+    const iconInput = document.getElementById("iconInput");
+    const apiType = document.getElementById("apiType");
+    const userApiKey = document.getElementById("userApiKey");
+    const loadingDiv = document.getElementById("loading");
+    const resultArea = document.getElementById("resultArea");
+
+    // ভ্যালু চেক করা
+    const rawInput = iconInput ? iconInput.value : "";
+    const selectedApi = apiType ? apiType.value : "huggingface";
+    const apiKey = userApiKey ? userApiKey.value : "";
     const styleElement = document.querySelector('input[name="iconStyle"]:checked');
     const style = styleElement ? styleElement.value : "napkin";
 
@@ -11,9 +27,9 @@ async function handleTextToIcon() {
         return;
     }
 
-    // ১. লোডিং দেখানো এবং ব্লিংকিং শুরু
-    document.getElementById("loading").style.display = "block";
-    document.getElementById("resultArea").style.display = "none";
+    // ১. ব্লিংকিং এবং লোডিং শুরু করা
+    if (loadingDiv) loadingDiv.style.display = "block";
+    if (resultArea) resultArea.style.display = "none";
 
     try {
         const serverUrl = "https://suvajit01-sr-visuals-backend.hf.space/generate-icon";
@@ -24,8 +40,8 @@ async function handleTextToIcon() {
             body: JSON.stringify({ 
                 prompt: rawInput,
                 style: style,
-                api_type: apiType,
-                user_key: userApiKey 
+                api_type: selectedApi,
+                user_key: apiKey 
             }),
         });
 
@@ -33,20 +49,37 @@ async function handleTextToIcon() {
 
         if (data.svg) {
             // ২. প্রিভিউ কন্টেইনারে আইকন সেট করা
-            document.getElementById("svgContainer").innerHTML = data.svg;
-            document.getElementById("resultArea").style.display = "block";
+            const container = document.getElementById("svgContainer");
+            if (container) container.innerHTML = data.svg;
+            if (resultArea) resultArea.style.display = "block";
             
-            // ৩. আইকনটি সরাসরি পাওয়ারপয়েন্ট স্লাইডে ইনসার্ট করা (জরুরি)
+            // ৩. আইকন সরাসরি স্লাইডে রিফ্লেক্ট করা
             insertToSlide(); 
             
         } else {
-            alert("Error: " + (data.error || "Generation failed. Check your API Key."));
+            alert("Error: " + (data.error || "Generation failed."));
         }
     } catch (error) {
         console.error("API Error:", error);
-        alert("Server error. Please check your internet or Space logs.");
+        alert("Server error. Please check your internet.");
     } finally {
-        // ৪. লোডিং বন্ধ করা
-        document.getElementById("loading").style.display = "none";
+        // লোডিং বন্ধ করা
+        if (loadingDiv) loadingDiv.style.display = "none";
     }
+}
+
+async function insertToSlide() {
+    const container = document.getElementById("svgContainer");
+    const svgContent = container ? container.innerHTML : "";
+    if (!svgContent) return;
+
+    Office.context.document.setSelectedDataAsync(
+        svgContent, 
+        { coercionType: Office.CoercionType.XmlSvg },
+        (result) => {
+            if (result.status === Office.AsyncResultStatus.Failed) {
+                console.error(result.error.message);
+            }
+        }
+    );
 }
