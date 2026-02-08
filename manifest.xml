@@ -18,7 +18,7 @@
   </Hosts>
 
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://10Roy.github.io/sr-visuals-plugin/taskpane.html" />
+    <SourceLocation DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/taskpane.html" />
   </DefaultSettings>
 
   <Permissions>ReadWriteDocument</Permissions>
@@ -69,14 +69,14 @@
 
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://10Roy.github.io/sr-visuals-plugin/assets/icon-16.png" />
-        <bt:Image id="Icon.32x32" DefaultValue="https://10Roy.github.io/sr-visuals-plugin/assets/icon-32.png" />
-        <bt:Image id="Icon.80x80" DefaultValue="https://10Roy.github.io/sr-visuals-plugin/assets/icon-80.png" />
+        <bt:Image id="Icon.16x16" DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/assets/icon-16.png" />
+        <bt:Image id="Icon.32x32" DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/assets/icon-32.png" />
+        <bt:Image id="Icon.80x80" DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/assets/icon-80.png" />
       </bt:Images>
       <bt:Urls>
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812" />
-        <bt:Url id="commands.Url" DefaultValue="https://10Roy.github.io/sr-visuals-plugin/commands.html" />
-        <bt:Url id="Taskpane.Url" DefaultValue="https://10Roy.github.io/sr-visuals-plugin/taskpane.html" />
+        <bt:Url id="commands.Url" DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/commands.html" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/taskpane.html" />
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GetStarted.Title" DefaultValue="Welcome to SR Visuals!" />
