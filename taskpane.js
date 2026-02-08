@@ -1,0 +1,156 @@
+/*
+ * SR Visuals - Main Logic
+ * Connects UI, ImageTracer, and Hugging Face Backend
+ */
+
+Office.onReady((info) => {
+    if (info.host === Office.HostType.PowerPoint) {
+        // ইভেন্ট লিসেনার যোগ করা
+        document.getElementById("btnGenerateIcon").onclick = handleTextToIcon;
+        document.getElementById("btnVectorize").onclick = handleImageToVector;
+        document.getElementById("imageUpload").onchange = showImagePreview;
+        document.getElementById("btnInsert").onclick = insertSvgToSlide;
+    }
+});
+
+// --- ১. গ্লোবাল ভেরিয়েবল ---
+let generatedSVG = ""; // তৈরি হওয়া SVG এখানে জমা থাকবে
+
+// --- ২. সার্ভার কানেকশন (অনুবাদ) ---
+async function translateWithMyServer(text) {
+    // আপনার তৈরি করা সার্ভার
+    const serverUrl = "https://suvajit01-sr-visuals-backend.hf.space/translate";
+    
+    try {
+        const response = await fetch(serverUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                text: text,
+                source_lang: "auto",
+                target_lang: "en"
+            }),
+        });
+
+        const data = await response.json();
+        return data.translated || text; // অনুবাদ না হলে আসল টেক্সট
+    } catch (error) {
+        console.error("Server error:", error);
+        return text; // সার্ভার অফ থাকলে আসল টেক্সট
+    }
+}
+
+// --- ৩. ইমেজ টু ভেক্টর (আপনার নতুন ফিচার) ---
+function showImagePreview() {
+    const file = document.getElementById("imageUpload").files[0];
+    const preview = document.getElementById("uploadedPreview");
+    const placeholder = document.getElementById("uploadPlaceholder");
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = "block";
+            placeholder.style.display = "none";
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function handleImageToVector() {
+    const file = document.getElementById("imageUpload").files[0];
+    if (!file) {
+        reportStatus("Please select an image first!");
+        return;
+    }
+
+    reportStatus("Converting to Vector...", true);
+
+    // ImageTracer ব্যবহার করে ছবি ট্রেস করা
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const imgData = event.target.result;
+        
+        // ImageTracer কনফিগারেশন (সুন্দর লাইনের জন্য)
+        const options = {
+            ltres: 1,       // Line tolerance (lower = more detailed)
+            qtres: 1,       // Curve tolerance
+            scale: 1,       // Scale factor
+            strokewidth: 2, // লাইন কতটা মোটা হবে
+            linefilter: true // নয়েজ কমানো
+        };
+
+        // কনভার্ট করা হচ্ছে
+        ImageTracer.imageToSVG(imgData, function(svgstr) {
+            displaySVG(svgstr);
+            reportStatus(""); // লোডিং বন্ধ
+        }, options);
+    };
+    reader.readAsDataURL(file);
+}
+
+// --- ৪. টেক্সট টু আইকন (AI + অনুবাদ) ---
+async function handleTextToIcon() {
+    const rawInput = document.getElementById("iconInput").value;
+    if (!rawInput) return;
+
+    reportStatus("Translating...", true);
+
+    // ১. সার্ভার দিয়ে অনুবাদ
+    const translatedPrompt = await translateWithMyServer(rawInput);
+    console.log("Searching for:", translatedPrompt);
+
+    // ২. (আপাতত) আমরা এখানে ডামি SVG দেখাবো, কারণ ইমেজ জেনারেশন সার্ভার সেটআপ বাকি
+    // ভবিষ্যতে এখানে আমরা Hugging Face Image API কল করব
+    reportStatus("Generating Visuals...", true);
+    
+    setTimeout(() => {
+        // একটা ডামি কফি কাপ আইকন (টেস্টিংয়ের জন্য)
+        const dummySVG = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M20,30 Q20,20 30,20 L70,20 Q80,20 80,30 L80,70 Q80,80 70,80 L30,80 Q20,80 20,70 Z" fill="none" stroke="#b7472a" stroke-width="3"/><path d="M80,30 Q95,30 95,45 Q95,60 80,60" fill="none" stroke="#b7472a" stroke-width="3"/></svg>`;
+        
+        displaySVG(dummySVG);
+        reportStatus(`Translated: "${translatedPrompt}" (Demo Icon)`);
+    }, 1000);
+}
+
+// --- ৫. হেল্পার ফাংশন ---
+function displaySVG(svgString) {
+    generatedSVG = svgString;
+    const container = document.getElementById("svgContainer");
+    container.innerHTML = svgString;
+    
+    // SVG এর সাইজ ঠিক করা যাতে প্রিভিউতে দেখা যায়
+    const svgEl = container.querySelector("svg");
+    if(svgEl) {
+        svgEl.setAttribute("width", "100%");
+        svgEl.setAttribute("height", "100%");
+    }
+
+    document.getElementById("resultArea").style.display = "block";
+}
+
+function insertSvgToSlide() {
+    if (!generatedSVG) return;
+
+    Office.context.document.setSelectedDataAsync(
+        generatedSVG,
+        { coercionType: Office.CoercionType.XmlSvg },
+        (asyncResult) => {
+            if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+                console.error(asyncResult.error.message);
+            }
+        }
+    );
+}
+
+function reportStatus(message, isLoading = false) {
+    const loader = document.getElementById("loading");
+    if (isLoading) {
+        loader.style.display = "block";
+        loader.querySelector("p").innerText = message;
+    } else {
+        loader.style.display = "none";
+        // এরর বা সাধারণ মেসেজ থাকলে অ্যালার্ট দেখানো যেতে পারে
+        if(message) console.log(message);
+    }
+}

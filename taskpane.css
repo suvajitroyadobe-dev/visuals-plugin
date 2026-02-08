@@ -1,0 +1,182 @@
+/* বেসিক রিসেট */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+    background-color: #f3f2f1;
+    color: #323130;
+}
+
+/* হেডার */
+.header {
+    background: #b7472a; /* PowerPoint Orange */
+    color: white;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* ট্যাব ডিজাইন */
+.tabs {
+    display: flex;
+    background: #ffffff;
+    border-bottom: 1px solid #e1dfdd;
+}
+
+.tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #605e5c;
+    transition: 0.3s;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn:hover {
+    background-color: #f3f2f1;
+    color: #b7472a;
+}
+
+.tab-btn.active {
+    color: #b7472a;
+    border-bottom: 3px solid #b7472a;
+    font-weight: bold;
+}
+
+/* কন্টেন্ট এরিয়া */
+.content {
+    padding: 20px;
+}
+
+.tab-content {
+    animation: fadeEffect 0.5s;
+}
+
+/* ইনপুট ফিল্ড */
+textarea, input[type="text"] {
+    width: 100%; /* ফুল সাইজ */
+    box-sizing: border-box; /* বর্ডারসহ সাইজ */
+    padding: 10px;
+    border: 1px solid #8a8886;
+    border-radius: 4px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+}
+
+textarea:focus {
+    border-color: #b7472a;
+    outline: none;
+}
+
+/* বাটন ডিজাইন */
+.primary-btn {
+    width: 100%;
+    background-color: #b7472a;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.primary-btn:hover {
+    background-color: #a33b21;
+}
+
+.insert-btn {
+    width: 100%;
+    background-color: #107c10; /* Excel/Success Green */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* ইমেজ আপলোড এরিয়া */
+.preview-box {
+    border: 2px dashed #b7472a;
+    background: #fff;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+input[type="file"] {
+    margin-bottom: 10px;
+}
+
+/* রেজাল্ট এরিয়া */
+.result-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e1dfdd;
+    text-align: center;
+}
+
+.svg-box {
+    background: white;
+    padding: 10px;
+    border: 1px solid #e1dfdd;
+    margin-bottom: 10px;
+    min-height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* লোডিং স্পিনার */
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #b7472a;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+/* স্টাইল অপশন (রেডিও বাটন) */
+.style-options {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 15px;
+}
+
+.style-options label {
+    cursor: pointer;
+    font-size: 14px;
+}
