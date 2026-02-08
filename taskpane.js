@@ -7,19 +7,23 @@ Office.onReady((info) => {
     }
 });
 
-// --- ১. টেক্সট টু আইকন লজিক ---
 async function handleTextToIcon() {
-    const rawInput = document.getElementById("iconInput").value;
-    const apiType = document.getElementById("apiType").value;
-    const userApiKey = document.getElementById("userApiKey").value;
-    const style = document.querySelector('input[name="iconStyle"]:checked').value;
+    const iconInput = document.getElementById("iconInput");
+    const apiType = document.getElementById("apiType");
+    const userApiKey = document.getElementById("userApiKey");
+
+    const rawInput = iconInput ? iconInput.value : "";
+    const selectedApi = apiType ? apiType.value : "huggingface";
+    const apiKey = userApiKey ? userApiKey.value : "";
+    const styleElement = document.querySelector('input[name="iconStyle"]:checked');
+    const style = styleElement ? styleElement.value : "napkin";
 
     if (!rawInput) {
         alert("Please describe your icon first.");
         return;
     }
 
-    // লোডিং স্ক্রিন দেখানো
+    // ১. ব্লিংকিং শুরু করা
     toggleLoading(true);
     document.getElementById("resultArea").style.display = "none";
 
@@ -28,56 +32,38 @@ async function handleTextToIcon() {
         
         const response = await fetch(serverUrl, {
             method: "POST",
-            headers: { 
-                "Content-Type": "application/json" 
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
                 prompt: rawInput,
                 style: style,
-                api_type: apiType, // ইউজার কি এপিআই টাইপ সিলেক্ট করেছে
-                user_key: userApiKey // ইউজারের কি ব্যাকএন্ডে পাঠানো হচ্ছে
+                api_type: selectedApi,
+                user_key: apiKey 
             }),
         });
 
         const data = await response.json();
 
         if (data.svg) {
-            const container = document.getElementById("svgContainer");
-            container.innerHTML = data.svg;
+            document.getElementById("svgContainer").innerHTML = data.svg;
             document.getElementById("resultArea").style.display = "block";
         } else {
-            // এরর মেসেজ হ্যান্ডলিং
-            alert("Error: " + (data.error || "Could not generate icon. Check your API Key."));
+            alert("Error: " + (data.error || "Generation failed."));
         }
     } catch (error) {
         console.error("API Error:", error);
-        alert("Server error. Please make sure your Hugging Face Space is Running.");
+        alert("Server error. Check if your Hugging Face Space is Running.");
     } finally {
+        // ২. ব্লিংকিং বন্ধ করা
         toggleLoading(false);
     }
 }
 
-// --- ২. স্লাইডে ইনসার্ট লজিক ---
 async function insertToSlide() {
     const svgContent = document.getElementById("svgContainer").innerHTML;
     if (!svgContent) return;
-
-    try {
-        Office.context.document.setSelectedDataAsync(
-            svgContent,
-            { coercionType: Office.CoercionType.XmlSvg },
-            (result) => {
-                if (result.status === Office.AsyncResultStatus.Failed) {
-                    console.error(result.error.message);
-                }
-            }
-        );
-    } catch (error) {
-        console.error("Insert Error:", error);
-    }
+    Office.context.document.setSelectedDataAsync(svgContent, { coercionType: Office.CoercionType.XmlSvg });
 }
 
-// --- ৩. লোডিং কন্ট্রোল ---
 function toggleLoading(isLoading) {
     const loadingDiv = document.getElementById("loading");
     if (loadingDiv) {
