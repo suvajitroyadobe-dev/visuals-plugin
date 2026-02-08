@@ -8,13 +8,9 @@ Office.onReady((info) => {
 });
 
 async function handleTextToIcon() {
-    const iconInput = document.getElementById("iconInput");
-    const apiType = document.getElementById("apiType");
-    const userApiKey = document.getElementById("userApiKey");
-
-    const rawInput = iconInput ? iconInput.value : "";
-    const selectedApi = apiType ? apiType.value : "huggingface";
-    const apiKey = userApiKey ? userApiKey.value : "";
+    const rawInput = document.getElementById("iconInput").value;
+    const apiType = document.getElementById("apiType").value;
+    const userApiKey = document.getElementById("userApiKey").value;
     const styleElement = document.querySelector('input[name="iconStyle"]:checked');
     const style = styleElement ? styleElement.value : "napkin";
 
@@ -23,8 +19,8 @@ async function handleTextToIcon() {
         return;
     }
 
-    // ১. ব্লিংকিং শুরু করা
-    toggleLoading(true);
+    // লোডিং দেখানো এবং ব্লিংকিং শুরু
+    document.getElementById("loading").style.display = "block";
     document.getElementById("resultArea").style.display = "none";
 
     try {
@@ -36,8 +32,8 @@ async function handleTextToIcon() {
             body: JSON.stringify({ 
                 prompt: rawInput,
                 style: style,
-                api_type: selectedApi,
-                user_key: apiKey 
+                api_type: apiType,
+                user_key: userApiKey 
             }),
         });
 
@@ -47,14 +43,14 @@ async function handleTextToIcon() {
             document.getElementById("svgContainer").innerHTML = data.svg;
             document.getElementById("resultArea").style.display = "block";
         } else {
-            alert("Error: " + (data.error || "Generation failed."));
+            alert("Error: " + (data.error || "Generation failed. Check your API Key."));
         }
     } catch (error) {
         console.error("API Error:", error);
-        alert("Server error. Check if your Hugging Face Space is Running.");
+        alert("Server error. Please check your internet or Space logs.");
     } finally {
-        // ২. ব্লিংকিং বন্ধ করা
-        toggleLoading(false);
+        // লোডিং বন্ধ
+        document.getElementById("loading").style.display = "none";
     }
 }
 
@@ -62,11 +58,4 @@ async function insertToSlide() {
     const svgContent = document.getElementById("svgContainer").innerHTML;
     if (!svgContent) return;
     Office.context.document.setSelectedDataAsync(svgContent, { coercionType: Office.CoercionType.XmlSvg });
-}
-
-function toggleLoading(isLoading) {
-    const loadingDiv = document.getElementById("loading");
-    if (loadingDiv) {
-        loadingDiv.style.display = isLoading ? "block" : "none";
-    }
 }
