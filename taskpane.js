@@ -8,14 +8,20 @@ Office.onReady((info) => {
 });
 
 // --- ১. টেক্সট টু আইকন (ইউজার API Key সহ) ---
-async function handleTextToIcon() {
-    const rawInput = document.getElementById("iconInput").value;
-    const userApiKey = document.getElementById("userApiKey").value; // ইউজারের কি সংগ্রহ
+// taskpane.js এর handleTextToIcon ফাংশনে পরিবর্তন
+const apiType = document.getElementById("apiType").value;
+const userApiKey = document.getElementById("userApiKey").value;
 
-    if (!rawInput) {
-        alert("Please describe your icon first.");
-        return;
-    }
+const response = await fetch(serverUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ 
+        prompt: rawInput,
+        style: style,
+        api_type: apiType, // কোন এপিআই ব্যবহার হবে
+        user_key: userApiKey 
+    }),
+});
 
     // লোডিং দেখানো
     toggleLoading(true);
@@ -89,3 +95,4 @@ function toggleLoading(isLoading) {
 function reportStatus(message, isBusy) {
     console.log(message);
 }
+
