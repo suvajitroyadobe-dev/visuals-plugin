@@ -8,26 +8,26 @@ Office.onReady((info) => {
 });
 
 async function handleTextToIcon() {
-    // এলিমেন্টগুলো সংগ্রহ করা
+    // ১. সব ইনপুট এবং এলিমেন্ট সংগ্রহ করা
     const iconInput = document.getElementById("iconInput");
-    const apiType = document.getElementById("apiType");
-    const userApiKey = document.getElementById("userApiKey");
+    const apiTypeElem = document.getElementById("apiType");
+    const userApiKeyElem = document.getElementById("userApiKey");
     const loadingDiv = document.getElementById("loading");
     const resultArea = document.getElementById("resultArea");
 
-    // ভ্যালু চেক করা
+    // ২. ভ্যালুগুলো সংগ্রহ এবং ভেরিফাই করা
     const rawInput = iconInput ? iconInput.value : "";
-    const selectedApi = apiType ? apiType.value : "huggingface";
-    const apiKey = userApiKey ? userApiKey.value : "";
-    const styleElement = document.querySelector('input[name="iconStyle"]:checked');
-    const style = styleElement ? styleElement.value : "napkin";
+    const apiType = apiTypeElem ? apiTypeElem.value : "huggingface";
+    const userApiKey = userApiKeyElem ? userApiKeyElem.value : "";
+    const styleElem = document.querySelector('input[name="iconStyle"]:checked');
+    const style = styleElem ? styleElem.value : "napkin";
 
     if (!rawInput) {
         alert("Please describe your icon first.");
         return;
     }
 
-    // ১. ব্লিংকিং এবং লোডিং শুরু করা
+    // ৩. ব্লিংকিং এবং লোডিং শুরু করা
     if (loadingDiv) loadingDiv.style.display = "block";
     if (resultArea) resultArea.style.display = "none";
 
@@ -40,20 +40,20 @@ async function handleTextToIcon() {
             body: JSON.stringify({ 
                 prompt: rawInput,
                 style: style,
-                api_type: selectedApi,
-                user_key: apiKey 
+                api_type: apiType,
+                user_key: userApiKey 
             }),
         });
 
         const data = await response.json();
 
         if (data.svg) {
-            // ২. প্রিভিউ কন্টেইনারে আইকন সেট করা
+            // ৪. প্রিভিউ দেখানো এবং সরাসরি স্লাইডে ইনসার্ট করা
             const container = document.getElementById("svgContainer");
             if (container) container.innerHTML = data.svg;
             if (resultArea) resultArea.style.display = "block";
             
-            // ৩. আইকন সরাসরি স্লাইডে রিফ্লেক্ট করা
+            // স্লাইডে অটোমেটিক রিফ্লেক্ট করার জন্য
             insertToSlide(); 
             
         } else {
@@ -61,9 +61,9 @@ async function handleTextToIcon() {
         }
     } catch (error) {
         console.error("API Error:", error);
-        alert("Server error. Please check your internet.");
+        alert("Server connection failed. Check your internet.");
     } finally {
-        // লোডিং বন্ধ করা
+        // ৫. লোডিং বন্ধ করা
         if (loadingDiv) loadingDiv.style.display = "none";
     }
 }
@@ -78,7 +78,7 @@ async function insertToSlide() {
         { coercionType: Office.CoercionType.XmlSvg },
         (result) => {
             if (result.status === Office.AsyncResultStatus.Failed) {
-                console.error(result.error.message);
+                console.error("Insert failed: " + result.error.message);
             }
         }
     );
