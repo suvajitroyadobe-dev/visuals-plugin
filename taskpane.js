@@ -1,13 +1,5 @@
-/* global Office */
-
-Office.onReady((info) => {
-    if (info.host === Office.HostType.PowerPoint) {
-        document.getElementById("btnGenerateIcon").onclick = handleTextToIcon;
-        document.getElementById("btnInsert").onclick = insertToSlide;
-    }
-});
-
 async function handleTextToIcon() {
+    // ইনপুট ভ্যালু সংগ্রহ করা
     const rawInput = document.getElementById("iconInput").value;
     const apiType = document.getElementById("apiType").value;
     const userApiKey = document.getElementById("userApiKey").value;
@@ -19,7 +11,7 @@ async function handleTextToIcon() {
         return;
     }
 
-    // লোডিং দেখানো এবং ব্লিংকিং শুরু
+    // ১. লোডিং দেখানো এবং ব্লিংকিং শুরু
     document.getElementById("loading").style.display = "block";
     document.getElementById("resultArea").style.display = "none";
 
@@ -40,8 +32,13 @@ async function handleTextToIcon() {
         const data = await response.json();
 
         if (data.svg) {
+            // ২. প্রিভিউ কন্টেইনারে আইকন সেট করা
             document.getElementById("svgContainer").innerHTML = data.svg;
             document.getElementById("resultArea").style.display = "block";
+            
+            // ৩. আইকনটি সরাসরি পাওয়ারপয়েন্ট স্লাইডে ইনসার্ট করা (জরুরি)
+            insertToSlide(); 
+            
         } else {
             alert("Error: " + (data.error || "Generation failed. Check your API Key."));
         }
@@ -49,13 +46,7 @@ async function handleTextToIcon() {
         console.error("API Error:", error);
         alert("Server error. Please check your internet or Space logs.");
     } finally {
-        // লোডিং বন্ধ
+        // ৪. লোডিং বন্ধ করা
         document.getElementById("loading").style.display = "none";
     }
-}
-
-async function insertToSlide() {
-    const svgContent = document.getElementById("svgContainer").innerHTML;
-    if (!svgContent) return;
-    Office.context.document.setSelectedDataAsync(svgContent, { coercionType: Office.CoercionType.XmlSvg });
 }
