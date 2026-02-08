@@ -1,93 +1,91 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<OfficeApp
-  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
-  xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
-  xsi:type="TaskPaneApp">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <title>SR Visuals</title>
+    
+    <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js" type="text/javascript"></script>
+    
+    <link href="taskpane.css" rel="stylesheet" type="text/css" />
+    <script src="libs/imagetracer.js" type="text/javascript"></script>
+</head>
 
-  <Id>78f4b64e-9a1c-4389-8039-0652755b4109</Id>
-  <Version>1.0.0.0</Version>
-  <ProviderName>SR Visuals</ProviderName>
-  <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="SR Visuals" />
-  <Description DefaultValue="Convert text and images to vector icons and diagrams." />
+<body class="ms-font-m">
 
-  <Hosts>
-    <Host Name="Presentation" />
-  </Hosts>
+    <header class="header">
+        <h1 class="ms-font-xl ms-fontWeight-semibold">SR Visuals</h1>
+    </header>
 
-  <DefaultSettings>
-    <SourceLocation DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/taskpane.html" />
-  </DefaultSettings>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('iconTab')">Icon</button>
+        <button class="tab-btn" onclick="openTab('infoTab')">Infographic</button>
+        <button class="tab-btn" onclick="openTab('imgTab')">Img2Vec</button>
+    </div>
 
-  <Permissions>ReadWriteDocument</Permissions>
+    <main class="content">
+        
+        <div id="iconTab" class="tab-content active">
+            <label class="ms-font-m">Describe your Icon:</label>
+            <textarea id="iconInput" placeholder="E.g., A coffee cup, minimalist style..."></textarea>
+            
+            <div class="style-options">
+                <label><input type="radio" name="iconStyle" value="napkin" checked> Napkin (Sketch)</label>
+                <label><input type="radio" name="iconStyle" value="geo"> Geometric</label>
+            </div>
+            
+            <button id="btnGenerateIcon" class="primary-btn">Generate Icon</button>
+        </div>
 
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
-    <Hosts>
-      <Host xsi:type="Presentation">
-        <DesktopFormFactor>
-          <GetStarted>
-            <Title resid="GetStarted.Title"/>
-            <Description resid="GetStarted.Description"/>
-            <LearnMoreUrl resid="GetStarted.LearnMoreUrl"/>
-          </GetStarted>
-          <FunctionFile resid="commands.Url" />
-          
-          <ExtensionPoint xsi:type="PrimaryCommandSurface">
-            <CustomTab id="TabSRVisuals">
-              <Group id="SRVisualsGroup">
-                <Label resid="GroupLabel" />
-                <Icon>
-                  <bt:Image size="16" resid="Icon.16x16" />
-                  <bt:Image size="32" resid="Icon.32x32" />
-                  <bt:Image size="80" resid="Icon.80x80" />
-                </Icon>
-                <Control xsi:type="Button" id="TaskpaneButton">
-                  <Label resid="TaskpaneButton.Label" />
-                  <Supertip>
-                    <Title resid="TaskpaneButton.Label" />
-                    <Description resid="TaskpaneButton.Tooltip" />
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="Icon.16x16" />
-                    <bt:Image size="32" resid="Icon.32x32" />
-                    <bt:Image size="80" resid="Icon.80x80" />
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>ButtonId1</TaskpaneId>
-                    <SourceLocation resid="Taskpane.Url" />
-                  </Action>
-                </Control>
-              </Group>
-              <Label resid="TabLabel" />
-            </CustomTab>
-          </ExtensionPoint>
-        </DesktopFormFactor>
-      </Host>
-    </Hosts>
+        <div id="infoTab" class="tab-content" style="display:none;">
+            <label class="ms-font-m">Topic or Process:</label>
+            <textarea id="infoInput" placeholder="E.g., 3 step marketing process..."></textarea>
+            
+            <button id="btnGenerateInfo" class="primary-btn">Create Diagram</button>
+        </div>
 
-    <Resources>
-      <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/assets/icon-16.png" />
-        <bt:Image id="Icon.32x32" DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/assets/icon-32.png" />
-        <bt:Image id="Icon.80x80" DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/assets/icon-80.png" />
-      </bt:Images>
-      <bt:Urls>
-        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812" />
-        <bt:Url id="commands.Url" DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/taskpane.html" />
-        <bt:Url id="Taskpane.Url" DefaultValue="https://suvajitroyadobe-dev.github.io/visuals-plugin/taskpane.html" />
-      </bt:Urls>
-      <bt:ShortStrings>
-        <bt:String id="GetStarted.Title" DefaultValue="Welcome to SR Visuals!" />
-        <bt:String id="TabLabel" DefaultValue="SR Visuals" />
-        <bt:String id="GroupLabel" DefaultValue="Vector Tools" />
-        <bt:String id="TaskpaneButton.Label" DefaultValue="Open Generator" />
-      </bt:ShortStrings>
-      <bt:LongStrings>
-        <bt:String id="GetStarted.Description" DefaultValue="Create stunning vector visuals from text and sketches." />
-        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to open the SR Visuals side panel." />
-      </bt:LongStrings>
-    </Resources>
-  </VersionOverrides>
-</OfficeApp>
+        <div id="imgTab" class="tab-content" style="display:none;">
+            <label class="ms-font-m">Upload Sketch/Image:</label>
+            <input type="file" id="imageUpload" accept="image/png, image/jpeg">
+            
+            <div class="preview-box">
+                <img id="uploadedPreview" src="" style="display:none; max-width:100%;">
+                <span id="uploadPlaceholder">No image selected</span>
+            </div>
+
+            <button id="btnVectorize" class="primary-btn">Convert to Vector</button>
+        </div>
+
+        <div id="resultArea" class="result-section" style="display:none;">
+            <h3 class="ms-font-m">Preview:</h3>
+            <div id="svgContainer" class="svg-box"></div>
+            <button id="btnInsert" class="insert-btn">Insert to Slide</button>
+        </div>
+
+        <div id="loading" style="display:none;">
+            <div class="spinner"></div>
+            <p>Creating Magic...</p>
+        </div>
+
+    </main>
+
+    <script src="taskpane.js" type="text/javascript"></script>
+
+    <script>
+        // সাধারণ ট্যাব লজিক (JS ফাইলে নেওয়ার আগে এখানে রাখা হলো সহজ করার জন্য)
+        function openTab(tabName) {
+            var i, x, tablinks;
+            x = document.getElementsByClassName("tab-content");
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < x.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            event.currentTarget.className += " active";
+        }
+    </script>
+</body>
+</html>
