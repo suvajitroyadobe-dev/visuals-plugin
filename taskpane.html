@@ -25,10 +25,16 @@
         <button onclick="toggleSettings()" style="cursor:pointer; background:none; border:none; font-size:16px;">⚙️ Settings</button>
     </div>
     <div id="settingsPanel" class="settings-content">
-        <label class="ms-font-s">Hugging Face API Key:</label>
-        <input type="password" id="userApiKey" class="api-input" placeholder="Paste your hf_token here...">
-        <p style="font-size: 10px; color: #666;">Your key is used locally and not stored on our server.</p>
-    </div>
+    <label class="ms-font-s">Select API Type:</label>
+    <select id="apiType" class="api-input">
+        <option value="openai">ChatGPT (DALL-E 3)</option>
+        <option value="gemini">Google Gemini</option>
+        <option value="huggingface">Hugging Face</option>
+    </select>
+    
+    <label class="ms-font-s" style="margin-top:10px; display:block;">Enter your API Key:</label>
+    <input type="password" id="userApiKey" class="api-input" placeholder="Paste your API key here...">
+</div>
 
     <header class="header">
         <h1 class="ms-font-xl ms-fontWeight-semibold">SR Visuals</h1>
@@ -112,4 +118,5 @@
     </script>
 </body>
 </html>
+
 
