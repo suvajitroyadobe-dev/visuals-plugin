@@ -143,16 +143,16 @@ textarea {
     margin: 20px auto;
 }
 
-.loading-blink {
-    animation: blinker 1.2s linear infinite;
+/* taskpane.css এ এটি যোগ করুন বা আপডেট করুন */
+.blink-text {
+    animation: blinker 1s linear infinite;
     font-weight: bold;
-    color: #b7472a;
+    color: #b7472a; /* আপনার থিম কালার */
     text-align: center;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+@keyframes blinker { 
+    50% { opacity: 0.3; } 
 }
 
 @keyframes blinker {
@@ -170,3 +170,4 @@ textarea {
     justify-content: center;
     align-items: center;
 }
+
