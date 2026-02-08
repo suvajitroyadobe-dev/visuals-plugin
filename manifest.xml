@@ -23,6 +23,11 @@
 
   <Permissions>ReadWriteDocument</Permissions>
 
+  <AppDomains>
+    <AppDomain>https://suvajit01-sr-visuals-backend.hf.space</AppDomain>
+    <AppDomain>https://suvajitroyadobe-dev.github.io</AppDomain>
+  </AppDomains>
+
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
     <Hosts>
       <Host xsi:type="Presentation">
@@ -91,3 +96,4 @@
     </Resources>
   </VersionOverrides>
 </OfficeApp>
+
