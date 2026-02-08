@@ -179,4 +179,27 @@ input[type="file"] {
 .style-options label {
     cursor: pointer;
     font-size: 14px;
+
+}
+
+/* লোডিং টেক্সট ব্লিংক করার জন্য অ্যানিমেশন */
+.loading-blink {
+    animation: blinker 1.5s linear infinite;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: bold;
+}
+
+@keyframes blinker {
+    50% { opacity: 0.3; }
+}
+
+/* সার্কেল ঘোরানোর জন্য অ্যানিমেশন */
+.spin-circle {
+    transform-origin: center;
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
