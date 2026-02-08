@@ -7,38 +7,34 @@ Office.onReady((info) => {
     }
 });
 
-// --- ১. টেক্সট টু আইকন (ইউজার API Key সহ) ---
-// taskpane.js এর handleTextToIcon ফাংশনে পরিবর্তন
-const apiType = document.getElementById("apiType").value;
-const userApiKey = document.getElementById("userApiKey").value;
+// --- ১. টেক্সট টু আইকন লজিক ---
+async function handleTextToIcon() {
+    const rawInput = document.getElementById("iconInput").value;
+    const apiType = document.getElementById("apiType").value;
+    const userApiKey = document.getElementById("userApiKey").value;
+    const style = document.querySelector('input[name="iconStyle"]:checked').value;
 
-const response = await fetch(serverUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ 
-        prompt: rawInput,
-        style: style,
-        api_type: apiType, // কোন এপিআই ব্যবহার হবে
-        user_key: userApiKey 
-    }),
-});
+    if (!rawInput) {
+        alert("Please describe your icon first.");
+        return;
+    }
 
-    // লোডিং দেখানো
+    // লোডিং স্ক্রিন দেখানো
     toggleLoading(true);
     document.getElementById("resultArea").style.display = "none";
 
     try {
-        const serverUrl = "https://suvajit01-sr-visuals-backend.hf.space/generate-icon"; // আপনার ব্যাকএন্ড এন্ডপয়েন্ট
-        const style = document.querySelector('input[name="iconStyle"]:checked').value;
-
+        const serverUrl = "https://suvajit01-sr-visuals-backend.hf.space/generate-icon";
+        
         const response = await fetch(serverUrl, {
             method: "POST",
             headers: { 
-                "Content-Type": "application/json"
+                "Content-Type": "application/json" 
             },
             body: JSON.stringify({ 
                 prompt: rawInput,
                 style: style,
+                api_type: apiType, // ইউজার কি এপিআই টাইপ সিলেক্ট করেছে
                 user_key: userApiKey // ইউজারের কি ব্যাকএন্ডে পাঠানো হচ্ছে
             }),
         });
@@ -50,6 +46,7 @@ const response = await fetch(serverUrl, {
             container.innerHTML = data.svg;
             document.getElementById("resultArea").style.display = "block";
         } else {
+            // এরর মেসেজ হ্যান্ডলিং
             alert("Error: " + (data.error || "Could not generate icon. Check your API Key."));
         }
     } catch (error) {
@@ -66,33 +63,24 @@ async function insertToSlide() {
     if (!svgContent) return;
 
     try {
-        await PowerPoint.run(async (context) => {
-            const sheet = context.presentation.slides.getItemAt(0); // প্রথম স্লাইডে ইনসার্ট
-            // স্লাইডে ইমেজ হিসেবে ইনসার্ট করার জন্য Office.js এর সাহায্য নেওয়া
-            Office.context.document.setSelectedDataAsync(
-                svgContent,
-                { coercionType: Office.CoercionType.XmlSvg },
-                (result) => {
-                    if (result.status === Office.AsyncResultStatus.Failed) {
-                        console.error(result.error.message);
-                    }
+        Office.context.document.setSelectedDataAsync(
+            svgContent,
+            { coercionType: Office.CoercionType.XmlSvg },
+            (result) => {
+                if (result.status === Office.AsyncResultStatus.Failed) {
+                    console.error(result.error.message);
                 }
-            );
-        });
+            }
+        );
     } catch (error) {
-        // যদি সরাসরি SVG সাপোর্ট না করে, তবে বেসিক মেথড
-        Office.context.document.setSelectedDataAsync(svgContent, { coercionType: Office.CoercionType.XmlSvg });
+        console.error("Insert Error:", error);
     }
 }
 
-// --- ৩. লোডিং এবং স্ট্যাটাস কন্ট্রোল ---
+// --- ৩. লোডিং কন্ট্রোল ---
 function toggleLoading(isLoading) {
     const loadingDiv = document.getElementById("loading");
-    loadingDiv.style.display = isLoading ? "block" : "none";
+    if (loadingDiv) {
+        loadingDiv.style.display = isLoading ? "block" : "none";
+    }
 }
-
-// স্ট্যাটাস রিপোর্ট ফাংশন (পুরানো কোডের সাথে সামঞ্জস্য রাখতে)
-function reportStatus(message, isBusy) {
-    console.log(message);
-}
-
