@@ -89,28 +89,45 @@ function handleImageToVector() {
     reader.readAsDataURL(file);
 }
 
-// --- ৪. টেক্সট টু আইকন (AI + অনুবাদ) ---
+// --- ৪. টেক্সট টু আইকন (আসল AI জেনারেশন) ---
 async function handleTextToIcon() {
     const rawInput = document.getElementById("iconInput").value;
     if (!rawInput) return;
 
-    reportStatus("Translating...", true);
+    reportStatus("Processing...", true);
 
-    // ১. সার্ভার দিয়ে অনুবাদ
+    // ১. আপনার সার্ভার দিয়ে অনুবাদ (যদি প্রয়োজন হয়)
     const translatedPrompt = await translateWithMyServer(rawInput);
     console.log("Searching for:", translatedPrompt);
 
-    // ২. (আপাতত) আমরা এখানে ডামি SVG দেখাবো, কারণ ইমেজ জেনারেশন সার্ভার সেটআপ বাকি
-    // ভবিষ্যতে এখানে আমরা Hugging Face Image API কল করব
     reportStatus("Generating Visuals...", true);
     
-    setTimeout(() => {
-        // একটা ডামি কফি কাপ আইকন (টেস্টিংয়ের জন্য)
-        const dummySVG = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M20,30 Q20,20 30,20 L70,20 Q80,20 80,30 L80,70 Q80,80 70,80 L30,80 Q20,80 20,70 Z" fill="none" stroke="#b7472a" stroke-width="3"/><path d="M80,30 Q95,30 95,45 Q95,60 80,60" fill="none" stroke="#b7472a" stroke-width="3"/></svg>`;
+    try {
+        // ২. আপনার Hugging Face ব্যাকএন্ডে রিকোয়েস্ট পাঠানো
+        const serverUrl = "https://suvajit01-sr-visuals-backend.hf.space/generate-icon"; 
         
-        displaySVG(dummySVG);
-        reportStatus(`Translated: "${translatedPrompt}" (Demo Icon)`);
-    }, 1000);
+        const response = await fetch(serverUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                prompt: translatedPrompt,
+                style: document.querySelector('input[name="iconStyle"]:checked').value 
+            }),
+        });
+
+        const data = await response.json();
+
+        if (data.svg) {
+            // আসল জেনারেটেড SVG দেখানো
+            displaySVG(data.svg);
+            reportStatus(`Success! Generated: "${translatedPrompt}"`);
+        } else {
+            reportStatus("Error: Could not generate icon.");
+        }
+    } catch (error) {
+        console.error("API Error:", error);
+        reportStatus("Server is sleeping. Please wait...");
+    }
 }
 
 // --- ৫. হেল্পার ফাংশন ---
@@ -153,4 +170,5 @@ function reportStatus(message, isLoading = false) {
         // এরর বা সাধারণ মেসেজ থাকলে অ্যালার্ট দেখানো যেতে পারে
         if(message) console.log(message);
     }
+
 }
