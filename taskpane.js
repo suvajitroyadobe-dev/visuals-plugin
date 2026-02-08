@@ -74,17 +74,25 @@ async function handleTextToIcon() {
 
 async function insertToSlide() {
     const container = document.getElementById("svgContainer");
-    const svgContent = container ? container.innerHTML : "";
-    if (!svgContent) return;
+    // innerHTML এর বদলে firstElementChild ব্যবহার করা নিরাপদ
+    const svgElement = container ? container.firstElementChild : null;
+    
+    if (!svgElement) return;
 
-    // স্লাইডে SVG ইনসার্ট লজিক
+    // SVG এলিমেন্টকে স্ট্রিং এ রূপান্তর করা
+    const serializer = new XMLSerializer();
+    const svgContent = serializer.serializeToString(svgElement);
+
     Office.context.document.setSelectedDataAsync(
         svgContent, 
         { coercionType: Office.CoercionType.XmlSvg },
         (result) => {
             if (result.status === Office.AsyncResultStatus.Failed) {
                 console.error("Insert failed: " + result.error.message);
+                // যদি XmlSvg ফেল করে তবে ব্যাকআপ হিসেবে HTML ট্রাই করুন
+                Office.context.document.setSelectedDataAsync(svgContent, { coercionType: Office.CoercionType.Html });
             }
         }
     );
 }
+
