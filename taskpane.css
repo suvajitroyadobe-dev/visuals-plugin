@@ -13,7 +13,7 @@ body {
     color: white;
     padding: 15px;
     text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);বক্স-ছায়া: 0 2px 5px rgba(0,0,0,0.2);বক্স-ছায়া: 0 2px 5px rgba(0,0,0,0.2);বক্স-ছায়া: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .header h1 {
@@ -90,7 +90,7 @@ body {
 
 /* কন্টেন্ট এরিয়া */
 .content {
-    padding: 20px;
+    padding: 20px;প্যাডিং: 20px;
 }
 
 /* ইনপুট ফিল্ড */
@@ -143,20 +143,18 @@ textarea {
     margin: 20px auto;
 }
 
-/* taskpane.css এ এটি যোগ করুন বা আপডেট করুন */
+/* taskpane.css আপডেট */
 .blink-text {
     animation: blinker 1s linear infinite;
     font-weight: bold;
-    color: #b7472a; /* আপনার থিম কালার */
+    color: #b7472a; 
     text-align: center;
 }
 
 @keyframes blinker { 
-    50% { opacity: 0.3; } 
-}
-
-@keyframes blinker {
+    0% { opacity: 1.0; }
     50% { opacity: 0.2; }
+    100% { opacity: 1.0; }
 }
 
 /* রেজাল্ট এরিয়া */
@@ -170,4 +168,5 @@ textarea {
     justify-content: center;
     align-items: center;
 }
+
 
