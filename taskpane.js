@@ -96,11 +96,10 @@ async function handleTextToIcon() {
 
     reportStatus("Processing...", true);
 
-    // ১. আপনার সার্ভার দিয়ে অনুবাদ (যদি প্রয়োজন হয়)
+    // ১. আপনার সার্ভার দিয়ে অনুবাদ
     const translatedPrompt = await translateWithMyServer(rawInput);
-    console.log("Searching for:", translatedPrompt);
-
-    reportStatus("Generating Visuals...", true);
+    
+    reportStatus("Generating your visual...", true);
     
     try {
         // ২. আপনার Hugging Face ব্যাকএন্ডে রিকোয়েস্ট পাঠানো
@@ -120,13 +119,13 @@ async function handleTextToIcon() {
         if (data.svg) {
             // আসল জেনারেটেড SVG দেখানো
             displaySVG(data.svg);
-            reportStatus(`Success! Generated: "${translatedPrompt}"`);
+            reportStatus(`Success! Created: "${translatedPrompt}"`);
         } else {
-            reportStatus("Error: Could not generate icon.");
+            reportStatus("Error: API is busy or failing.");
         }
     } catch (error) {
         console.error("API Error:", error);
-        reportStatus("Server is sleeping. Please wait...");
+        reportStatus("Backend is starting up. Please try again in 30 seconds.");
     }
 }
 
@@ -172,3 +171,4 @@ function reportStatus(message, isLoading = false) {
     }
 
 }
+
