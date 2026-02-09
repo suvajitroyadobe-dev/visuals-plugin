@@ -1,41 +1,45 @@
 /* global Office */
 
-Office.onReady((info) => {
-    if (info.host === Office.HostType.PowerPoint) {
-        // বাটন সেটআপ
-        const genBtn = document.getElementById("btnGenerateIcon");
-        if (genBtn) genBtn.onclick = handleTextToIcon;
-        
-        const insertBtn = document.getElementById("btnInsert");
-        if (insertBtn) insertBtn.onclick = manualInsert;
-
-        const vecBtn = document.getElementById("btnVectorize");
-        if (vecBtn) vecBtn.onclick = handleImageToVector;
+// ১. পেজ লোড হওয়ামাত্রই বাটন খুঁজে ইভেন্ট সেট করা (Office.onReady-র বাইরে)
+window.onload = function() {
+    console.log("Window Loaded");
+    const btn = document.getElementById("btnGenerateIcon");
+    if (btn) {
+        btn.onclick = handleTextToIcon;
+    } else {
+        console.error("Button not found!");
     }
+    
+    // ম্যানুয়াল ইনসার্ট বাটন
+    const insBtn = document.getElementById("btnInsert");
+    if (insBtn) insBtn.onclick = manualInsert;
+};
+
+Office.onReady((info) => {
+    console.log("Office Ready: " + info.host);
 });
 
-// ১. আইকন জেনারেট ফাংশন
 async function handleTextToIcon() {
+    // ২. বাটনে ক্লিক হয়েছে কি না তা চেক করা
+    alert("Button Clicked! Starting Process..."); 
+
     const rawInput = document.getElementById("iconInput").value;
     const apiType = document.getElementById("apiType").value;
     const userApiKey = document.getElementById("userApiKey").value;
-    
-    // রেডিও বাটন সিলেকশন চেক
     let style = "napkin";
     const styleElem = document.querySelector('input[name="iconStyle"]:checked');
     if (styleElem) style = styleElem.value;
 
     if (!rawInput) {
-        alert("Please describe your icon first.");
+        alert("Error: Please write a prompt first.");
         return;
     }
 
-    // লোডিং শুরু
+    // লোডিং দেখানো
     document.getElementById("loading").style.display = "block";
-    document.getElementById("resultArea").style.display = "none";
-
+    
     try {
-        console.log("Sending Request...");
+        // ৩. সার্ভারে রিকোয়েস্ট পাঠানো
         const response = await fetch("https://suvajit01-sr-visuals-backend.hf.space/generate-icon", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -48,103 +52,50 @@ async function handleTextToIcon() {
         });
 
         const data = await response.json();
-        console.log("Response:", data);
-
-        if (data.svg) {
-            // প্রিভিউ সেট করা
-            document.getElementById("svgContainer").innerHTML = data.svg;
-            document.getElementById("resultArea").style.display = "block";
+        
+        // ৪. সার্ভার থেকে ডাটা এসেছে কি না চেক করা
+        if (data.raw_image) {
+            alert("Success! Image received from server."); // ডিবাগ মেসেজ
             
-            // অটোমেটিক ইনসার্ট চেষ্টা করা
-            insertToSlide(data.svg);
+            // প্রিভিউ সেট করা
+            const container = document.getElementById("svgContainer");
+            container.innerHTML = data.svg;
+            container.dataset.rawImage = data.raw_image;
+            document.getElementById("resultArea").style.display = "block";
+
+            // ৫. স্লাইডে ছবি বসানো
+            insertToSlide(data.raw_image);
         } else {
-            alert("Error from Server: " + (data.error || "Unknown Error"));
+            alert("Server Error: " + JSON.stringify(data));
         }
     } catch (error) {
-        console.error(error);
-        alert("Connection Failed! Check console for details.");
+        alert("Network Error: " + error.message);
     } finally {
         document.getElementById("loading").style.display = "none";
     }
 }
 
-// ২. ইমেজ টু ভেক্টর ফাংশন
-async function handleImageToVector() {
-    const fileInput = document.getElementById("imageInput");
-    if (!fileInput.files.length) {
-        alert("Please select an image.");
+function insertToSlide(base64Code) {
+    if (!base64Code) {
+        alert("No image data to insert!");
         return;
     }
 
-    document.getElementById("loading").style.display = "block";
-    const formData = new FormData();
-    formData.append("file", fileInput.files[0]);
-
-    try {
-        const response = await fetch("https://suvajit01-sr-visuals-backend.hf.space/image-to-vector", {
-            method: "POST",
-            body: formData
-        });
-        const data = await response.json();
-        
-        if (data.svg) {
-            document.getElementById("svgContainer").innerHTML = data.svg;
-            document.getElementById("resultArea").style.display = "block";
-            insertToSlide(data.svg);
-        }
-    } catch (e) {
-        alert("Vector Error: " + e.message);
-    } finally {
-        document.getElementById("loading").style.display = "none";
-    }
-}
-
-// ৩. ম্যানুয়াল ইনসার্ট বাটন ফাংশন
-function manualInsert() {
-    const content = document.getElementById("svgContainer").innerHTML;
-    if(content) insertToSlide(content);
-    else alert("No icon to insert!");
-}
-
-// ৪. মেইন ইনসার্ট লজিক (সবচেয়ে গুরুত্বপূর্ণ অংশ)
-function insertToSlide(svgString) {
-    if (!svgString) return;
-
-    // ক) প্রথমে দেখব এটা ইমেজ-বেসড SVG কি না (Text-to-Icon এর জন্য)
-    const base64Match = svgString.match(/base64,([^"']+)/);
-    
-    if (base64Match && base64Match[1]) {
-        console.log("Trying to insert as Image...");
-        
-        Office.context.document.setSelectedDataAsync(
-            base64Match[1], // শুধু বেস৬৪ কোড
-            { coercionType: Office.CoercionType.Image },
-            (result) => {
-                if (result.status === Office.AsyncResultStatus.Failed) {
-                    console.error("Image Insert Failed:", result.error.message);
-                    // ইমেজ ফেইল করলে প্ল্যান বি: HTML
-                    tryHtmlInsert(svgString);
-                } else {
-                    console.log("Success: Image Inserted!");
-                }
-            }
-        );
-    } else {
-        // খ) যদি ইমেজ না থাকে (পিওর ভেক্টর), তবে SVG বা HTML হিসেবে চেষ্টা করব
-        console.log("Trying to insert as Vector/HTML...");
-        tryHtmlInsert(svgString);
-    }
-}
-
-function tryHtmlInsert(content) {
     Office.context.document.setSelectedDataAsync(
-        content,
-        { coercionType: Office.CoercionType.Html },
+        base64Code,
+        { coercionType: Office.CoercionType.Image },
         (result) => {
             if (result.status === Office.AsyncResultStatus.Failed) {
-                // এখানে আমরা আসল কারণ দেখতে পাব
-                alert("Final Insert Failed. Error: " + result.error.message);
+                alert("Insert Failed: " + result.error.message);
+            } else {
+                console.log("Image inserted!");
             }
         }
     );
+}
+
+function manualInsert() {
+    const imgData = document.getElementById("svgContainer").dataset.rawImage;
+    if (imgData) insertToSlide(imgData);
+    else alert("Please generate an icon first.");
 }
