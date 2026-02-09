@@ -4,37 +4,25 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <title>SR Visuals</title>
-    
     <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js" type="text/javascript"></script>
-    
     <link href="taskpane.css" rel="stylesheet" type="text/css" />
-    <script src="libs/imagetracer.js" type="text/javascript"></script>
-    <style>
-        /* সেটিংসের জন্য বাড়তি স্টাইল */
-        .settings-bar { display: flex; justify-content: flex-end; padding: 5px 10px; background: #f4f4f4; }
-        .settings-content { padding: 10px; background: #fffbe6; border-bottom: 1px solid #ddd; display: none; }
-        .api-input { width: 90%; padding: 5px; margin-top: 5px; border: 1px solid #ccc; font-size: 12px; }
-        .blink-text { animation: blinker 1s linear infinite; color: #e67e22; font-weight: bold; }
-        @keyframes blinker { 50% { opacity: 0.3; } }
-    </style>
 </head>
 
 <body class="ms-font-m">
 
     <div class="settings-bar">
-        <button onclick="toggleSettings()" style="cursor:pointer; background:none; border:none; font-size:16px;">⚙️ Settings</button>
+        <button id="btnSettings" style="cursor:pointer; background:none; border:none; font-size:16px;">⚙️ Settings</button>
     </div>
-    <div id="settingsPanel" class="settings-content">
-    <label class="ms-font-s">Select API Type:</label>
-    <select id="apiType" class="api-input">
-        <option value="openai">ChatGPT (DALL-E 3)</option>
-        <option value="gemini">Google Gemini</option>
-        <option value="huggingface">Hugging Face</option>
-    </select>
     
-    <label class="ms-font-s" style="margin-top:10px; display:block;">Enter your API Key:</label>
-    <input type="password" id="userApiKey" class="api-input" placeholder="Paste your API key here...">
-</div>
+    <div id="settingsPanel" class="settings-content">
+        <label class="ms-font-s">Select API Type:</label>
+        <select id="apiType" class="api-input">
+            <option value="huggingface">Hugging Face</option>
+        </select>
+        
+        <label class="ms-font-s" style="margin-top:10px; display:block;">Enter your API Key:</label>
+        <input type="password" id="userApiKey" class="api-input" placeholder="Paste your API key here...">
+    </div>
 
     <header class="header">
         <h1 class="ms-font-xl ms-fontWeight-semibold">SR Visuals</h1>
@@ -50,33 +38,29 @@
         
         <div id="iconTab" class="tab-content active">
             <label class="ms-font-m">Describe your Icon:</label>
-            <textarea id="iconInput" placeholder="E.g., A coffee cup, minimalist style..."></textarea>
+            <textarea id="iconInput" placeholder="E.g., A minimalist coffee cup..."></textarea>
             
             <div class="style-options">
-                <label><input type="radio" name="iconStyle" value="napkin" checked> Napkin (Sketch)</label>
-                <label><input type="radio" name="iconStyle" value="geo"> Geometric</label>
+                <label><input type="radio" name="iconStyle" value="napkin" checked> Sketch</label>
+                <label><input type="radio" name="iconStyle" value="geometric"> Geometric</label>
             </div>
             
             <button id="btnGenerateIcon" class="primary-btn">Generate Icon</button>
         </div>
 
         <div id="infoTab" class="tab-content" style="display:none;">
-            <label class="ms-font-m">Topic or Process:</label>
-            <textarea id="infoInput" placeholder="E.g., 3 step marketing process..."></textarea>
-            
-            <button id="btnGenerateInfo" class="primary-btn">Create Diagram</button>
+            <p style="color: #666;">Infographic generator coming soon...</p>
         </div>
 
         <div id="imgTab" class="tab-content" style="display:none;">
-            <label class="ms-font-m">Upload Sketch/Image:</label>
-            <input type="file" id="imageUpload" accept="image/png, image/jpeg">
-            
-            <div class="preview-box">
-                <img id="uploadedPreview" src="" style="display:none; max-width:100%;">
-                <span id="uploadPlaceholder">No image selected</span>
-            </div>
+            <label class="ms-font-m">Upload Image:</label>
+            <input type="file" id="imageInput" accept="image/png, image/jpeg">
+            <button id="btnVectorize" class="primary-btn" style="margin-top: 10px;">Convert to Vector</button>
+        </div>
 
-            <button id="btnVectorize" class="primary-btn">Convert to Vector</button>
+        <div id="loading" style="display:none; text-align:center; padding: 20px;">
+            <div class="spinner"></div>
+            <p class="blink-text">Generating Visuals... Please wait.</p>
         </div>
 
         <div id="resultArea" class="result-section" style="display:none;">
@@ -85,38 +69,26 @@
             <button id="btnInsert" class="insert-btn">Insert to Slide</button>
         </div>
 
-        <div id="loading" style="display:none; text-align:center; padding: 20px;">
-            <div class="spinner"></div>
-            <p class="blink-text">Generating Visuals...</p>
-        </div>
-
     </main>
 
     <script src="taskpane.js" type="text/javascript"></script>
 
     <script>
-        // সেটিংস প্যানেল খোলা/বন্ধ করা
-        function toggleSettings() {
-            var panel = document.getElementById("settingsPanel");
-            panel.style.display = (panel.style.display === "block") ? "none" : "block";
-        }
-
-        // ট্যাব লজিক
+        // ট্যাব লজিক (ইনলাইন)
         function openTab(tabName) {
             var i, x, tablinks;
             x = document.getElementsByClassName("tab-content");
-            for (i = 0; i < x.length; i++) {
-                x[i].style.display = "none";
-            }
+            for (i = 0; i < x.length; i++) { x[i].style.display = "none"; }
             tablinks = document.getElementsByClassName("tab-btn");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
+            for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); }
             document.getElementById(tabName).style.display = "block";
             event.currentTarget.className += " active";
+        }
+        // সেটিংস টগল
+        document.getElementById("btnSettings").onclick = function() {
+            var panel = document.getElementById("settingsPanel");
+            panel.style.display = (panel.style.display === "block") ? "none" : "block";
         }
     </script>
 </body>
 </html>
-
-
