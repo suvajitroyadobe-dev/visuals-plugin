@@ -2,21 +2,12 @@
 
 Office.onReady((info) => {
     if (info.host === Office.HostType.PowerPoint) {
-        // বাটন ইভেন্ট হ্যান্ডলার
-        const generateBtn = document.getElementById("btnGenerateIcon");
-        if (generateBtn) {
-            generateBtn.onclick = handleTextToIcon;
-        }
-        
-        const insertBtn = document.getElementById("btnInsert");
-        if (insertBtn) {
-            insertBtn.onclick = insertToSlide;
-        }
+        document.getElementById("btnGenerateIcon").onclick = handleTextToIcon;
+        document.getElementById("btnInsert").onclick = insertToSlide;
     }
 });
 
 async function handleTextToIcon() {
-    // ১. ইনপুট ভ্যালু সংগ্রহ
     const rawInput = document.getElementById("iconInput")?.value || "";
     const apiType = document.getElementById("apiType")?.value || "huggingface";
     const userApiKey = document.getElementById("userApiKey")?.value || "";
@@ -28,12 +19,9 @@ async function handleTextToIcon() {
         return;
     }
 
-    // ২. লোডিং দেখানো
-    const loadingDiv = document.getElementById("loading");
-    const resultArea = document.getElementById("resultArea");
-    
-    if (loadingDiv) loadingDiv.style.display = "block";
-    if (resultArea) resultArea.style.display = "none";
+    // লোডিং শুরু
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("resultArea").style.display = "none";
 
     try {
         const serverUrl = "https://suvajit01-sr-visuals-backend.hf.space/generate-icon";
@@ -52,43 +40,64 @@ async function handleTextToIcon() {
         const data = await response.json();
 
         if (data.svg) {
-            // ৩. প্রিভিউ দেখানো
+            // প্রিভিউ দেখানো
             const container = document.getElementById("svgContainer");
-            if (container) container.innerHTML = data.svg;
-            if (resultArea) resultArea.style.display = "block";
+            container.innerHTML = data.svg;
+            document.getElementById("resultArea").style.display = "block";
             
-            // ৪. স্লাইডে অটোমেটিক পাঠানো
+            // অটোমেটিক ইনসার্ট
             insertToSlide(); 
-            
         } else {
             alert("Error: " + (data.error || "Generation failed."));
         }
     } catch (error) {
         console.error("API Error:", error);
-        alert("Server connection failed. Check your internet.");
+        alert("Server connection failed.");
     } finally {
-        if (loadingDiv) loadingDiv.style.display = "none";
+        document.getElementById("loading").style.display = "none";
     }
 }
 
-async function insertToSlide() {
+function insertToSlide() {
     const container = document.getElementById("svgContainer");
     const svgContent = container ? container.innerHTML : "";
     
-    // সংশোধিত লাইন (বাংলা লেখাটি বাদ দেওয়া হয়েছে)
     if (!svgContent) return;
 
-    // PowerPoint-এ Image যুক্ত SVG দেখানোর জন্য 'Html' টাইপ ব্যবহার করা হচ্ছে
+    // ১. চেষ্টা: সরাসরি ইমেজ হিসেবে ইনসার্ট করা (সবচেয়ে নিরাপদ পদ্ধতি)
+    // আমরা SVG স্ট্রিং থেকে Base64 কোডটি বের করে আনব
+    const base64Match = svgContent.match(/base64,([^"]*)/);
+    
+    if (base64Match && base64Match[1]) {
+        const imageBase64 = base64Match[1]; // শুধু কোডটুকু
+        
+        Office.context.document.setSelectedDataAsync(
+            imageBase64,
+            { coercionType: Office.CoercionType.Image }, // Image টাইপ ব্যবহার করলে মিস হবে না
+            (result) => {
+                if (result.status === Office.AsyncResultStatus.Failed) {
+                    console.error("Image Insert failed: " + result.error.message);
+                    // ২. ব্যর্থ হলে HTML হিসেবে চেষ্টা
+                    insertAsHtml(svgContent);
+                }
+            }
+        );
+    } else {
+        // যদি Base64 না পাওয়া যায়, তবে সরাসরি HTML হিসেবে দিন
+        insertAsHtml(svgContent);
+    }
+}
+
+function insertAsHtml(htmlContent) {
     Office.context.document.setSelectedDataAsync(
-        svgContent,
+        htmlContent,
         { coercionType: Office.CoercionType.Html },
         (result) => {
             if (result.status === Office.AsyncResultStatus.Failed) {
-                console.error("Insert failed: " + result.error.message);
-                // যদি Html কাজ না করে, তবে ইউজারের ম্যানুয়ালি কপি করার অপশন থাকেই
-                alert("Could not insert automatically. Please copy the icon manually.");
+                console.error("HTML Insert failed: " + result.error.message);
+                alert("Could not insert icon. Please try again.");
             }
         }
     );
 }
-
+এখানে ফাইল বিষয়বস্তু লিখুন
