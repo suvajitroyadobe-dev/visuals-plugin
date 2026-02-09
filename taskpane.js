@@ -2,7 +2,7 @@
 
 Office.onReady((info) => {
     if (info.host === Office.HostType.PowerPoint) {
-        // বাটন ক্লিক ইভেন্ট সেট করা
+        // বাটন ইভেন্ট হ্যান্ডলার
         const generateBtn = document.getElementById("btnGenerateIcon");
         if (generateBtn) {
             generateBtn.onclick = handleTextToIcon;
@@ -16,7 +16,7 @@ Office.onReady((info) => {
 });
 
 async function handleTextToIcon() {
-    // ১. এলিমেন্টগুলো থেকে সরাসরি ভ্যালু নেওয়া
+    // ১. ইনপুট ভ্যালু সংগ্রহ
     const rawInput = document.getElementById("iconInput")?.value || "";
     const apiType = document.getElementById("apiType")?.value || "huggingface";
     const userApiKey = document.getElementById("userApiKey")?.value || "";
@@ -28,7 +28,7 @@ async function handleTextToIcon() {
         return;
     }
 
-    // ২. লোডিং এবং ব্লিংকিং শুরু করা
+    // ২. লোডিং দেখানো
     const loadingDiv = document.getElementById("loading");
     const resultArea = document.getElementById("resultArea");
     
@@ -52,7 +52,7 @@ async function handleTextToIcon() {
         const data = await response.json();
 
         if (data.svg) {
-            // ৩. আইকন প্রিভিউ দেখানো
+            // ৩. প্রিভিউ দেখানো
             const container = document.getElementById("svgContainer");
             if (container) container.innerHTML = data.svg;
             if (resultArea) resultArea.style.display = "block";
@@ -65,9 +65,8 @@ async function handleTextToIcon() {
         }
     } catch (error) {
         console.error("API Error:", error);
-        alert("Server connection failed.");
+        alert("Server connection failed. Check your internet.");
     } finally {
-        // লোডিং বন্ধ করা
         if (loadingDiv) loadingDiv.style.display = "none";
     }
 }
@@ -76,18 +75,20 @@ async function insertToSlide() {
     const container = document.getElementById("svgContainer");
     const svgContent = container ? container.innerHTML : "";
     
-    if (!svgContent) return;যদি (!svgContent) ফিরে আসে;
+    // সংশোধিত লাইন (বাংলা লেখাটি বাদ দেওয়া হয়েছে)
+    if (!svgContent) return;
 
-    // XmlSvg এর বদলে Html ব্যবহার করুন
+    // PowerPoint-এ Image যুক্ত SVG দেখানোর জন্য 'Html' টাইপ ব্যবহার করা হচ্ছে
     Office.context.document.setSelectedDataAsync(
         svgContent,
-        { coercionType: Office.CoercionType.Html }, // এই লাইনটি পরিবর্তন করা হয়েছে
+        { coercionType: Office.CoercionType.Html },
         (result) => {
             if (result.status === Office.AsyncResultStatus.Failed) {
                 console.error("Insert failed: " + result.error.message);
-                // যদি Html ও কাজ না করে, তবে বেসিক ইমেজ হিসেবে চেষ্টা করবে
-                Office.context.document.setSelectedDataAsync(svgContent, { coercionType: Office.CoercionType.Ooxml });
+                // যদি Html কাজ না করে, তবে ইউজারের ম্যানুয়ালি কপি করার অপশন থাকেই
+                alert("Could not insert automatically. Please copy the icon manually.");
             }
         }
     );
 }
+এখানে ফাইল বিষয়বস্তু লিখুন
